@@ -14,6 +14,8 @@ if (CMAKE_SYSTEM_NAME MATCHES Linux)
   set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fPIC")
 endif ()
 
+set(OpenCV_DIR "~/work/softs/opencv-3.3.1/build")
+
 include_directories(inc)
 
 include_directories(mw_capture_inc)
