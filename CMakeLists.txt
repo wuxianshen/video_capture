@@ -9,6 +9,8 @@ elseif(${CMAKE_SYSTEM_PROCESSOR} STREQUAL "x86_64" )
   set(X86_64 true)
 endif()
 
+set(CMAKE_BINARY_DIR ${CMAKE_CURRENT_SOURCE_DIR}/build/bin)
+
 if (CMAKE_SYSTEM_NAME MATCHES Linux)
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -pthread -fPIC")
   set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fPIC")
@@ -17,7 +19,11 @@ endif ()
 set(OpenCV_DIR "~/work/softs/opencv-3.3.1/build")
 
 include_directories(inc)
+include_directories(object_detect/inc)
 
+#########################
+##  PCIE-HDMI-CAPTURE  ##
+#########################
 include_directories(mw_capture_inc)
 include_directories(mw_capture_inc/common)
 include_directories(mw_capture_inc/LibMWCapture)
@@ -25,7 +31,11 @@ include_directories(mw_capture_inc/LibMWClosedCaption)
 
 include_directories(/usr/include/)
 
-FILE(GLOB MW_CAPTURE_SRCS src/*.cpp)
+FILE(GLOB VIDEO_CAPTURE_SRCS src/*.cpp
+
+                             object_detect/src/improcess.cpp
+                             object_detect/src/obj_detect.cpp
+        )
 
 if ( AARCH64 )
   set(MW_LIB_PATH ${CMAKE_SOURCE_DIR}/mw_capture_lib/arm64)
@@ -38,21 +48,19 @@ endif()
 link_directories(${MW_LIB_PATH})
 link_directories(/usr/lib/x86_64-linux-gnu/)
 link_directories(/lib/x86_64-linux-gnu/)
+link_directories(${CMAKE_SOURCE_DIR}/object_detect/lib/)
 
-add_executable(${PROJECT_NAME} ${MW_CAPTURE_SRCS} src/main.cpp src/image_handler.cpp inc/image_handler.h)
+add_executable(${PROJECT_NAME} ${VIDEO_CAPTURE_SRCS})
 
 target_link_libraries(${PROJECT_NAME} PUBLIC MWCapture)
-
-#target_link_libraries(${PROJECT_NAME} PUBLIC /lib/x86_64-linux-gnu/libdl.so.2)
-#target_link_libraries(${PROJECT_NAME} PUBLIC /lib/x86_64-linux-gnu/libudev.so.1)
-#target_link_libraries(${PROJECT_NAME} PUBLIC /usr/lib/x86_64-linux-gnu/libv4l2.so.0)
-#target_link_libraries(${PROJECT_NAME} PUBLIC /usr/lib/x86_64-linux-gnu/libasound.so.2)
 
 target_link_libraries(${PROJECT_NAME} PUBLIC -lpthread)
 target_link_libraries(${PROJECT_NAME} PUBLIC -ldl)
 target_link_libraries(${PROJECT_NAME} PUBLIC -ludev)
 target_link_libraries(${PROJECT_NAME} PUBLIC -lasound)
 target_link_libraries(${PROJECT_NAME} PUBLIC -lv4l2)
+
+target_link_libraries(${PROJECT_NAME} PUBLIC -ldarknet)
 
 
 find_package( OpenCV QUIET )

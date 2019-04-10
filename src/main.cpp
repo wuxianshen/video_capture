@@ -19,6 +19,8 @@
 #include "opencv2/highgui/highgui.hpp"
 #endif
 
+#include "obj_detect.h"
+
 int mw_capture(int argc, char** argv)
 {
   bool ret = mw_capture::instance()->init();
@@ -54,8 +56,11 @@ int main(int argc, char** argv)
     std::cout << "Cannot open usb device!" << std::endl;
     return 0;
   }
+
   cv::Mat frame;
   unsigned int cnt = 0;
+
+  /*
   while( cnt < 20000 )
   {
     cap >> frame;
@@ -65,15 +70,42 @@ int main(int argc, char** argv)
       break;
     }
 
+    cv::imshow("USBCapture", frame);
+    cv::waitKey(1);
+  }
+  cap.release();
+
+  return 0;
+  */
+
+  MixDetector detector;
+  detector.setup();
+
+  while( cnt < 20000 )
+  {
+    cap >> frame;
+    if ( frame.empty() )
+    {
+      std::cout << "Empty image..." << std::endl;
+      break;
+    }
+
+    detector.loadImg(frame);
+
+    int c = cv::waitKey(30);
+    if((char)c == 27)
+      break;
+    else if(c>=0)
+      cv::waitKey(0);
+
+    /*
     if ( cnt % 200 == 0 )
     {
       std::stringstream sstr;
       sstr << "img_" << cnt << ".jpg";
       cv::imwrite(sstr.str(), frame);
     }
-
-    cv::imshow("USBCapture", frame);
-    cv::waitKey(1);
+    */
 
     cnt++;
   }
